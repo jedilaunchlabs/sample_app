@@ -8,3 +8,8 @@ class StaticPagesController < ApplicationController
   def about
   end
 end
+
+
+
+
+puts controller = StaticPagesController.new
