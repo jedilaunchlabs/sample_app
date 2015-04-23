@@ -14,16 +14,18 @@ class UsersIndexTest < ActionDispatch::IntegrationTest
     assert_template 'users/index'
     assert_select 'div.pagination'
     first_page_of_users = User.paginate(page: 1)
-    first_page_of_users.each do |user|
-      assert_select 'a[href=?]', user_path(user), text: user.name
-      unless user == @admin
-        assert_select 'a[href=?]', user_path(user), text: 'delete',
-                                                    method: :delete
+
+      first_page_of_users.each do |user|
+        assert_select 'a[href=?]', user_path(user), text: user.name
+        unless user == @admin
+          assert_select 'a[href=?]', user_path(user), text: 'delete',
+                                                      method: :delete
+      end 
+
+    end
+      assert_difference 'User.count', -1 do
+        delete user_path(@non_admin)
       end
-    end
-    assert_difference 'User.count', -1 do
-      delete user_path(@non_admin)
-    end
   end
 
 
@@ -31,6 +33,22 @@ class UsersIndexTest < ActionDispatch::IntegrationTest
     log_in_as(@non_admin)
     get users_path
     assert_select 'a', text: 'delete', count: 0
+  end
+
+
+  test "/users only showing activated account as ADMIN" do
+    log_in_as(@admin)
+    get users_path
+    activated = true
+    assert_equal @non_admin.activated, activated
+  end
+
+
+  test "/users only showing activated account as NON-ADMIN" do
+    log_in_as(@non_admin)
+    get users_path
+    activated = true
+    assert_equal @non_admin.activated, activated
   end
 
 end
